@@ -1,3 +1,5 @@
+> Current API migration: see [API_MIGRATION.md](API_MIGRATION.md). The dry case now requires Reload.xml; the wet case is not yet adapted.
+
 # Fixed-head fish research (fish_2)
 
 ## Cases and status

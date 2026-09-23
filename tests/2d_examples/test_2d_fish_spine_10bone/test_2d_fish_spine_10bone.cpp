@@ -43,10 +43,10 @@ int main(int ac, char *av[])
     //----------------------------------------------------------------------
     SolidBody muscle(sph_system, makeShared<FishMuscleBody>("MuscleBody"));
     muscle.defineAdaptationRatios(1.15, 2.0);
-    muscle.defineBodyLevelSetShape()->writeLevelSet(sph_system);
-    muscle.defineMaterial<FishTissueComposite>();
+    muscle.defineBodyLevelSetShape().writeLevelSet();
+    muscle.defineMatterMaterial<FishTissueComposite>();
     (!sph_system.RunParticleRelaxation() && sph_system.ReloadParticles())
-        ? muscle.generateParticles<BaseParticles, Reload>(muscle.getName())
+        ? muscle.generateParticles<BaseParticles, Reload>(muscle.Name())
         : muscle.generateParticles<BaseParticles, Lattice>();
 
     std::vector<std::unique_ptr<SolidBody>> bones;
@@ -56,8 +56,8 @@ int main(int ac, char *av[])
         bones.push_back(std::make_unique<SolidBody>(
             sph_system, makeShared<BoneSegmentBody>("BoneBody_" + std::to_string(i), i)));
         bones[i]->defineAdaptationRatios(1.15, 2.0);
-        bones[i]->defineBodyLevelSetShape()->writeLevelSet(sph_system);
-        bones[i]->defineMaterial<SaintVenantKirchhoffSolid>(rho0_s, young_bone, poisson);
+        bones[i]->defineBodyLevelSetShape().writeLevelSet();
+        bones[i]->defineMatterMaterial<SaintVenantKirchhoffSolid>(rho0_s, young_bone, poisson);
         bones[i]->generateParticles<BaseParticles, Lattice>();
     }
 
@@ -155,8 +155,8 @@ int main(int ac, char *av[])
     std::vector<Vec2d> bone_coms;
     for (size_t i = 0; i < bone_segments; ++i)
     {
-        bone_infos.push_back(SimTK::Body::Rigid(*bone_parts[i]->body_part_mass_properties_));
-        bone_coms.push_back(bone_parts[i]->initial_mass_center_);
+        bone_infos.push_back(SimTK::Body::Rigid(bone_parts[i]->getSimTKMassProperties()));
+        bone_coms.push_back(bone_parts[i]->getMassCenter());
     }
 
     SimTK::MobilizedBody::Weld left_mob(

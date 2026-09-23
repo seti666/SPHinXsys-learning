@@ -76,7 +76,7 @@ Real swim_frequency = 4.0;              /**< Beat frequency (Hz). */
 Real swim_wave_length = 3.0 * fish_length;
 Real swim_start_time = 0.2;             /**< Soft-start time constant. */
 
-BoundingBox system_domain_bounds(
+BoundingBoxd system_domain_bounds(
     Vec2d(cx - 0.03, cy - 0.03),
     Vec2d(cx + fish_length + 0.03, cy + 0.03));
 
@@ -116,10 +116,10 @@ class FishMuscleBody : public MultiPolygonShape
         for (auto &p : fish_shape)
             p[0] = 2.0 * cx + fish_length - p[0];
         std::reverse(fish_shape.begin(), fish_shape.end()); // keep polygon winding consistent
-        multi_polygon_.addAPolygon(fish_shape, ShapeBooleanOps::add);
-        multi_polygon_.addAPolygon(
+        multi_polygon_.addPolygon(fish_shape, GeometricOps::add);
+        multi_polygon_.addPolygon(
             createRectangleShape(spine_x_start, spine_x_end, cy - bone_half, cy + bone_half),
-            ShapeBooleanOps::sub);
+            GeometricOps::sub);
     }
 };
 
@@ -140,9 +140,9 @@ class BoneSegmentBody : public MultiPolygonShape
   public:
     BoneSegmentBody(const std::string &shape_name, size_t segment_index) : MultiPolygonShape(shape_name)
     {
-        multi_polygon_.addAPolygon(
+        multi_polygon_.addPolygon(
             createRectangleShape(segmentStart(segment_index), segmentEnd(segment_index), cy - bone_half, cy + bone_half),
-            ShapeBooleanOps::add);
+            GeometricOps::add);
     }
 };
 
@@ -226,7 +226,7 @@ class ImposingActiveStrain : public solid_dynamics::ElasticDynamicsInitialCondit
           material_id_(particles_->getVariableDataByName<int>("MaterialID")),
           pos0_(particles_->registerStateVariableDataFrom<Vecd>("InitialPosition", "Position")),
           active_strain_(particles_->getVariableDataByName<Matd>("ActiveStrain")),
-          physical_time_(sph_system_.getSystemVariableDataByName<Real>("PhysicalTime")) {};
+          physical_time_(solid_body.getSPHSystem().getSystemVariableDataByName<Real>("PhysicalTime")) {};
 
     void update(size_t index_i, Real dt = 0.0)
     {
